@@ -1,5 +1,5 @@
 jdk:
   - openjdk21
-build:
-  commands:
-    - mvn install -DskipTests -B
+before_install:
+  - sdk install gradle 8.13
+  - sdk use gradle 8.13
