@@ -2,11 +2,11 @@ plugins {
     id 'java'
     id 'java-library'
     id 'maven-publish'
-    id 'com.gradleup.shadow' version '8.3.6'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
 }
 
 group = 'dev.pixelstudios'
-version = '1.14.0'
+version = '1.15.0'
 
 repositories {
     mavenCentral()
@@ -27,6 +27,7 @@ repositories {
 
 dependencies {
     compileOnly 'org.spigotmc:spigot-api:1.21.11-R0.1-SNAPSHOT'
+
 
     compileOnly 'me.clip:placeholderapi:2.11.5'
     compileOnly 'de.tr7zw:item-nbt-api:2.15.3'
@@ -59,6 +60,12 @@ shadowJar {
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+tasks {
+    shadowJar {
+        relocate 'com.cryptomorin.xseries', 'my.plugin.utils'
+    }
 }
 
 publishing {

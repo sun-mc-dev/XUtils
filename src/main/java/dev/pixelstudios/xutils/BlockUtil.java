@@ -41,5 +41,4 @@ public class BlockUtil {
             return AXIS[Math.round(player.getLocation().getYaw() / 90f) & 0x3].getOppositeFace();
         }
     }
-
 }

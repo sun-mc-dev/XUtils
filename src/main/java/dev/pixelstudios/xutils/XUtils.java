@@ -25,5 +25,4 @@ public final class XUtils extends JavaPlugin {
 
         return plugin;
     }
-
 }

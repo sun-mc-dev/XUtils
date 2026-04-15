@@ -9,12 +9,7 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.ConfigurationSection;
 
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
@@ -93,7 +88,7 @@ public class Cuboid implements Iterable<Block> {
     public boolean isInside(Location location) {
         if (location == null) return false;
 
-        return location.getWorld().equals(world)
+        return Objects.equals(location.getWorld(), world)
                 && location.getBlockX() >= xMin && location.getBlockX() <= xMax
                 && location.getBlockY() >= yMin && location.getBlockY() <= yMax
                 && location.getBlockZ() >= zMin && location.getBlockZ() <= zMax;
