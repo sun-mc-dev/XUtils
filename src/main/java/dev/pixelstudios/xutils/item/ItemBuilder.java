@@ -9,7 +9,10 @@ import dev.pixelstudios.xutils.VersionUtil;
 import dev.pixelstudios.xutils.text.TextUtil;
 import dev.pixelstudios.xutils.text.placeholder.PlaceholderMap;
 import lombok.Getter;
-import org.bukkit.*;
+import org.bukkit.Color;
+import org.bukkit.FireworkEffect;
+import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.configuration.ConfigurationSection;
@@ -17,17 +20,14 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ArmorMeta;
-import org.bukkit.inventory.meta.Damageable;
-import org.bukkit.inventory.meta.FireworkMeta;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.inventory.meta.LeatherArmorMeta;
-import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.inventory.meta.*;
 import org.bukkit.inventory.meta.trim.ArmorTrim;
 import org.bukkit.potion.Potion;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionType;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -38,7 +38,18 @@ import java.util.Map;
 public final class ItemBuilder implements Cloneable {
 
     private static final Map<PotionEffectType, String> EFFECT_NAMES = new HashMap<>();
-    private static final Profileable FALLBACK_PROFILE = Profileable.username("MHF_Steve");
+    private static Profileable FALLBACK_PROFILE;
+
+    private static @Nullable Profileable getFallbackProfile() {
+        if (FALLBACK_PROFILE == null) {
+            try {
+                FALLBACK_PROFILE = Profileable.username("MHF_Steve");
+            } catch (Throwable t) {
+                return null;
+            }
+        }
+        return FALLBACK_PROFILE;
+    }
 
     static {
         EFFECT_NAMES.put(XPotion.INSTANT_DAMAGE.getPotionEffectType(), "Harming");
@@ -67,7 +78,7 @@ public final class ItemBuilder implements Cloneable {
         this(new ItemStack(material));
     }
 
-    public static ItemBuilder of(String item) {
+    public static @NotNull ItemBuilder of(String item) {
         return ItemProvider.parse(item);
     }
 
@@ -128,10 +139,8 @@ public final class ItemBuilder implements Cloneable {
     public ItemBuilder color(Color color) {
         if (meta instanceof LeatherArmorMeta) {
             ((LeatherArmorMeta) meta).setColor(color);
-
         } else if (meta instanceof FireworkMeta) {
             ((FireworkMeta) meta).addEffect(FireworkEffect.builder().withColor(color).build());
-
         } else if (meta instanceof PotionMeta && ReflectionUtil.supports(11)) {
             ((PotionMeta) meta).setColor(color);
         }
@@ -158,7 +167,6 @@ public final class ItemBuilder implements Cloneable {
             new Potion(type, effect.getAmplifier() + 1, true, effect.getDuration() > 200).apply(item);
         } else {
             ((PotionMeta) meta).addCustomEffect(effect, true);
-
             if (ReflectionUtil.supports(11)) {
                 color(effect.getType().getColor());
             }
@@ -202,9 +210,17 @@ public final class ItemBuilder implements Cloneable {
     public ItemBuilder texture(String texture) {
         this.texture = texture;
 
-        XSkull.of(meta).profile(Profileable.detect(texture))
-                .fallback(FALLBACK_PROFILE)
-                .apply();
+        try {
+            Profileable fallback = getFallbackProfile();
+            if (fallback != null) {
+                XSkull.of(meta)
+                        .profile(Profileable.detect(texture))
+                        .fallback(fallback)
+                        .apply();
+            }
+        } catch (Throwable t) {
+            TextUtil.warn("Failed to apply skull texture '" + texture + "': " + t.getMessage());
+        }
         return this;
     }
 
@@ -239,7 +255,7 @@ public final class ItemBuilder implements Cloneable {
         return this;
     }
 
-    public ItemStack build() {
+    public @NotNull ItemStack build() {
         ItemStack result = item.clone();
         result.setItemMeta(meta);
 
@@ -257,7 +273,7 @@ public final class ItemBuilder implements Cloneable {
     }
 
     @Override
-    public ItemBuilder clone() {
+    public @NotNull ItemBuilder clone() {
         ItemBuilder clone = new ItemBuilder(this.item.clone());
 
         clone.meta = this.meta.clone();
