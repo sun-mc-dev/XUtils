@@ -69,7 +69,7 @@ public final class ItemBuilder implements Cloneable {
     private String texture;
     private boolean legacySplash;
 
-    public ItemBuilder(ItemStack item) {
+    public ItemBuilder(@NotNull ItemStack item) {
         this.item = item;
         this.meta = item.getItemMeta();
     }
