@@ -28,7 +28,6 @@ repositories {
 dependencies {
     compileOnly 'org.spigotmc:spigot-api:1.21.11-R0.1-SNAPSHOT'
 
-
     compileOnly 'me.clip:placeholderapi:2.11.5'
     compileOnly 'de.tr7zw:item-nbt-api:2.15.3'
     compileOnly 'com.sk89q:worldguard:6.1.1-SNAPSHOT'
@@ -46,7 +45,7 @@ dependencies {
 
     compileOnly fileTree(dir: 'libs', include: ['*.jar'])
 
-    api 'com.github.cryptomorin:XSeries:13.6.0'
+    implementation 'com.github.cryptomorin:XSeries:13.6.0'
 
     compileOnly 'org.projectlombok:lombok:1.18.42'
     annotationProcessor 'org.projectlombok:lombok:1.18.42'
@@ -54,24 +53,20 @@ dependencies {
 
 shadowJar {
     exclude 'META-INF/**'
-    minimize()
+    relocate 'com.cryptomorin.xseries', 'dev.pixelstudios.xutils.libs.xseries'
 }
+
+jar.dependsOn shadowJar
 
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
 }
 
-tasks {
-    shadowJar {
-        relocate 'com.cryptomorin.xseries', 'my.plugin.utils'
-    }
-}
-
 publishing {
     publications {
         maven(MavenPublication) {
-            from components.java
+            artifact shadowJar
         }
     }
 }
